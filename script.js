@@ -1,17 +1,31 @@
 const valor = document.querySelector("#valor");
 const input = document.querySelector("#qtdChar");
-// Definir valor inicial do range
-input.value = 7; // Valor padrão de 7 caracteres
+// Definir valor inicial para o centro do slider (8)
+input.value = 8;
 valor.textContent = input.value;
 
-// Atualizar o valor do output sempre que o input mudar
+// Função para atualizar o preenchimento do slider
+function atualizarSlider(e) {
+    const target = e.target;
+    const min = target.min;
+    const max = target.max;
+    const val = target.value;
+    
+    // Atualiza o background com o gradiente
+    const percentage = (val - min) * 100 / (max - min);
+    target.style.background = `linear-gradient(to right, #667eea ${percentage}%, #e2e8f0 ${percentage}%)`;
+}
+
+// Atualizar o valor do output e o preenchimento sempre que o input mudar
 input.addEventListener("input", (evento) => {
     valor.textContent = evento.target.value;
+    atualizarSlider(evento);
 });
 
-// Atualizar o valor do output quando a página carregar
+// Atualizar o valor do output e o preenchimento quando a página carregar
 window.addEventListener("load", () => {
     valor.textContent = input.value;
+    atualizarSlider({ target: input });
 });
 
 function pegarValores() {
@@ -31,7 +45,31 @@ function pegarValores() {
 
     const senha = gerarSenha(incluirNumeros, incluirSimbolos, incluirLetras, tamanho);
 
-    document.querySelector("#senha_txt").innerHTML = `A senha gerada é:<br>${senha}`;
+    const senhaDisplay = document.querySelector(".password-display");
+    senhaDisplay.textContent = senha;
+    document.querySelector("#senha_txt").querySelector("button").classList.remove("copied");
+}
+
+async function copiarSenha() {
+    const senhaDisplay = document.querySelector(".password-display");
+    const senha = senhaDisplay.textContent;
+    
+    if (senha) {
+        try {
+            await navigator.clipboard.writeText(senha);
+            const btnCopiar = document.querySelector(".copy-btn");
+            btnCopiar.classList.add("copied");
+            btnCopiar.textContent = "Copiado!";
+            
+            // Reverter o botão após 2 segundos
+            setTimeout(() => {
+                btnCopiar.classList.remove("copied");
+                btnCopiar.textContent = "Copiar Senha";
+            }, 2000);
+        } catch (err) {
+            console.error('Erro ao copiar senha:', err);
+        }
+    }
 }
 
 function gerarSenha(incluirNumeros, incluirSimbolos, incluirLetras, tamanho) {
